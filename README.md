@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Hilal — Kelime Okuma
 
-## Getting Started
+**Yayında:** <https://randomselectnet.github.io/hilal-kelime/>
 
-First, run the development server:
+Tek bir QR barkod ve kırk bir kelime. Barkodu yazdırıp bir yere yapıştırıyorsun;
+telefonun kamerası okuttuğunda site açılıyor ve kelimeler sırayla, Türkçe sesle
+okunuyor.
+
+## Nasıl çalışır
+
+- `/` — Barkod sayfası. QR kodu ekrandaki adrese göre üretilir; PNG (2048×2048)
+  veya SVG olarak indirilebilir, doğrudan yazdırılabilir (A4, yalnızca kart çıkar).
+- `/oku` — Okuma ekranı. Tek tek kelime gösterir, Türkçe sesle okur ve otomatik
+  ilerler. `Duraklat`, `Önceki/Sonraki`, hız (`1×`), sesi kapatma ve `Baştan`
+  kontrolleri vardır. Klavye: `Boşluk` duraklat, `←` `→` gezin, `R` baştan.
+
+Sesli okuma tarayıcının `speechSynthesis` özelliğini kullanır. Tarayıcılar sesi
+yalnızca bir dokunuştan sonra başlatabildiği için okuma ekranında
+**“Okumaya başla”** düğmesine bir kez dokunmak gerekir. Cihazda Türkçe bir ses
+yüklü değilse kelimeler yine sırayla gösterilir.
+
+## Yerelde çalıştırma
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Ardından <http://localhost:3000> adresini aç.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+> Yerel adres (`localhost`) telefonun erişebileceği bir adres değildir. Telefonla
+> denemek için siteyi yayına al ya da aynı ağdaki bilgisayarın IP'sini kullan.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Yayına alma ve barkodu yazdırma
 
-## Learn More
+Site GitHub Pages'te yayınlanıyor. `main` dalına yapılan her push, GitHub Actions
+ile statik çıktıyı (`out/`) derleyip yayına alır
+([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)).
 
-To learn more about Next.js, take a look at the following resources:
+1. Yayındaki adresi telefonda aç, barkodun doğru adresi gösterdiğini gör.
+2. **PNG indir** ile barkodu indir ya da **Yazdır** ile kartı doğrudan yazdır.
+3. Yazdırırken kâğıt boyutu A4 seçilebilir; yazdırma çıktısında yalnızca barkod
+   kartı görünür. Kart yaklaşık 96 mm genişliğindedir; QR'ı en az 3×3 cm olacak
+   şekilde yazdırmak okutmayı kolaylaştırır.
+4. Kartı kes, istediğin yere yapıştır. Telefon kamerasıyla okut.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Barkodun hedef adresi sayfadaki **“Barkodun açacağı adres”** alanından
+değiştirilebilir. Varsayılan olarak `NEXT_PUBLIC_SITE_URL` + `/oku/` kullanılır;
+bu değer tanımlı değilse sitenin kendi adresi + `/oku` kullanılır.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Başka bir yere (ör. Vercel) taşımak istersen `output: "export"` gerekmez:
+`STATIC_EXPORT` ortam değişkenini kaldırıp normal Next.js build'i kullanabilirsin.
 
-## Deploy on Vercel
+## Kelimeleri değiştirme
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Kelimeler [`src/lib/words.ts`](src/lib/words.ts) dosyasındadır. Listeye kelime
+ekleyip çıkarabilirsin; sayaçlar, ilerleme çubuğu ve bitiş ekranı otomatik uyum
+sağlar.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Teknolojiler
+
+- Next.js 16 (App Router, Cache Components)
+- React 19
+- Tailwind CSS 4
+- `qrcode` — barkod üretimi (istemci tarafında)
+- `next/font` — Fraunces & Manrope

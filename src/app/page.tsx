@@ -1,69 +1,110 @@
-import Image from "next/image";
+import Link from "next/link";
+import { Crescent } from "@/components/crescent";
+import { wordCount } from "@/lib/words";
+import QrPanel from "./qr-panel";
+
+const steps = [
+  {
+    number: "01",
+    title: "Yazdır",
+    body: "Barkodu PNG olarak indir ya da doğrudan yazdır. Kartı kesip istediğin yere yapıştır.",
+  },
+  {
+    number: "02",
+    title: "Okut",
+    body: "Telefonun kamerasını barkoda tut. Bağlantı kendiliğinden açılır, uygulama gerekmez.",
+  },
+  {
+    number: "03",
+    title: "Dinle",
+    body: "“Okumaya başla”ya dokun; kelimeler sırayla, Türkçe sesle okunur.",
+  },
+];
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main className="paper-stage grain relative min-h-dvh overflow-hidden">
+      <Crescent className="pointer-events-none absolute -right-24 top-24 hidden h-[32rem] w-[32rem] text-ink/[0.045] lg:block print:hidden" />
+
+      <header className="screen-only relative mx-auto flex max-w-6xl items-center justify-between px-6 pt-7 sm:px-8 sm:pt-9">
+        <Link href="/" className="group flex items-center gap-3">
+          <Crescent className="h-6 w-6 text-oxblood transition-transform duration-500 group-hover:-rotate-12" />
+          <span className="flex flex-col">
+            <span className="font-display text-lg leading-none tracking-[0.02em]">
+              Hilal
+            </span>
+            <span className="smallcaps mt-1 text-[9px] text-ink-soft">
+              Kelime kiti
+            </span>
+          </span>
+        </Link>
+
+        <Link
+          href="/oku"
+          className="smallcaps border-b border-ink/25 pb-1 text-ink-soft transition-colors hover:border-oxblood hover:text-oxblood"
+        >
+          Okumayı dene
+        </Link>
+      </header>
+
+      <section className="relative mx-auto grid max-w-6xl items-start gap-14 px-6 pb-20 pt-14 sm:px-8 sm:pt-20 lg:grid-cols-[1.02fr_0.98fr] lg:gap-20 lg:pb-28">
+        <div className="screen-only">
+          <p className="smallcaps flex items-center gap-3 text-ink-soft">
+            <span className="h-1 w-1 rounded-full bg-oxblood" />
+            Yazdırılabilir barkod
           </p>
+
+          <h1 className="mt-7 font-display text-[clamp(2.7rem,6.4vw,4.9rem)] font-light leading-[0.94] tracking-[-0.035em] text-ink">
+            Tek barkod,
+            <br />
+            <span className="italic text-oxblood">{wordCount} kelime.</span>
+          </h1>
+
+          <p className="mt-7 max-w-md text-[15px] leading-7 text-ink-soft sm:text-base sm:leading-8">
+            Barkodu yazdır, bir yere yapıştır. Telefon kamerası okuttuğunda bu
+            sayfa açılır ve {wordCount} kelime sırayla, sesli olarak okunur.
+          </p>
+
+          <p className="mt-9 text-[12px] leading-6 text-ink-soft">
+            {wordCount} kelime · Türkçe sesli okuma · Uygulama gerekmez
+          </p>
+
+          <div className="hairline mt-10" />
+
+          <ol className="mt-8 space-y-0">
+            {steps.map((step, index) => (
+              <li
+                key={step.number}
+                className={`grid grid-cols-[3rem_1fr] gap-4 py-5 ${
+                  index === 0 ? "" : "border-t border-ink/10"
+                }`}
+              >
+                <span className="font-mono text-[11px] tracking-[0.12em] text-gold">
+                  {step.number}
+                </span>
+                <div>
+                  <h2 className="font-display text-xl tracking-[-0.01em]">
+                    {step.title}
+                  </h2>
+                  <p className="mt-1.5 max-w-sm text-[13.5px] leading-6 text-ink-soft">
+                    {step.body}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ol>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+
+        <QrPanel />
+      </section>
+
+      <footer className="screen-only relative mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 border-t border-ink/10 px-6 py-7 text-[11px] text-ink-soft sm:px-8">
+        <span className="smallcaps text-[9px]">Hilal — Kelime okuma</span>
+        <span>
+          Sesli okuma tarayıcının Türkçe sesini kullanır. En iyi deneyim için
+          sesi açık tutun.
+        </span>
+      </footer>
+    </main>
   );
 }
