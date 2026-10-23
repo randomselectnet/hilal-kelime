@@ -14,10 +14,11 @@ okunuyor.
   ilerler. `Duraklat`, `Önceki/Sonraki`, hız (`1×`), sesi kapatma ve `Baştan`
   kontrolleri vardır. Klavye: `Boşluk` duraklat, `←` `→` gezin, `R` baştan.
 
-Sesli okuma tarayıcının `speechSynthesis` özelliğini kullanır. Tarayıcılar sesi
-yalnızca bir dokunuştan sonra başlatabildiği için okuma ekranında
-**“Okumaya başla”** düğmesine bir kez dokunmak gerekir. Cihazda Türkçe bir ses
-yüklü değilse kelimeler yine sırayla gösterilir.
+Sesli okuma tarayıcının `speechSynthesis` özelliğini kullanır. Cihazda Türkçe
+kadın/çocuk sesi varsa o tercih edilir; ayrıca perde yükseltilerek kız çocuk
+tonuna yaklaştırılır. Tarayıcılar sesi yalnızca bir dokunuştan sonra
+başlatabildiği için okuma ekranında **“Okumaya başla”** düğmesine bir kez dokunmak
+gerekir. Cihazda Türkçe bir ses yüklü değilse kelimeler yine sırayla gösterilir.
 
 ## Yerelde çalıştırma
 

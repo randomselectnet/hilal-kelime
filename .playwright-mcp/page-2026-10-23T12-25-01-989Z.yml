@@ -1,0 +1,21 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e3]:
+      - img [ref=e4]
+      - paragraph [ref=e6]: Hilal · Kelime okuma
+      - heading "Kelimeler" [level=1] [ref=e7]
+      - paragraph [ref=e8]: 41 kelime sırayla ve sesli okunacak. Başlamak için dokun.
+      - button "Okumaya başla" [ref=e9]:
+        - generic [ref=e10]: Okumaya başla
+        - img [ref=e11]
+      - generic [ref=e13]:
+        - generic [ref=e14]: 41 kelime
+        - generic [ref=e16]: yaklaşık 2 dakika
+        - generic [ref=e18]: Türkçe ses
+    - generic [ref=e19]:
+      - paragraph [ref=e20]: Türkçe ses hazırlanıyor…
+      - link "Barkodu indir" [ref=e21] [cursor=pointer]:
+        - /url: /
+  - button "Open Next.js Dev Tools" [ref=e27] [cursor=pointer]:
+    - img [ref=e28]
+  - alert [ref=e31]

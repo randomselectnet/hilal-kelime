@@ -9,6 +9,64 @@ type Phase = "intro" | "playing" | "paused";
 
 const SPEEDS = [0.85, 1, 1.15];
 
+/** Kız çocuk tonuna yaklaşmak için perde yükseltilir. */
+const CHILD_PITCH = 1.55;
+
+const FEMALE_HINTS = [
+  "filiz",
+  "yelda",
+  "seda",
+  "emel",
+  "aylin",
+  "zeynep",
+  "elif",
+  "melis",
+  "dilara",
+  "ece",
+  "female",
+  "kadın",
+  "kadin",
+  "kız",
+  "kiz",
+  "girl",
+  "child",
+  "çocuk",
+  "cocuk",
+  "genç",
+  "genc",
+  "young",
+];
+
+const MALE_HINTS = [
+  "tolga",
+  "ahmet",
+  "mehmet",
+  "emre",
+  "mert",
+  "burak",
+  "fatih",
+  "male",
+  "erkek",
+  "man",
+];
+
+function voiceScore(voice: SpeechSynthesisVoice): number {
+  const name = voice.name.toLowerCase();
+  let score = 0;
+  if (FEMALE_HINTS.some((hint) => name.includes(hint))) score += 100;
+  if (MALE_HINTS.some((hint) => name.includes(hint))) score -= 100;
+  if (voice.localService) score += 5;
+  return score;
+}
+
+function pickTurkishVoice(
+  list: SpeechSynthesisVoice[],
+): SpeechSynthesisVoice | undefined {
+  return list
+    .filter((voice) => voice.lang?.toLowerCase().startsWith("tr"))
+    .sort((a, b) => voiceScore(b) - voiceScore(a))[0];
+}
+
 export default function Reader() {
   const [phase, setPhase] = useState<Phase>("intro");
   const [index, setIndex] = useState(0);
@@ -29,9 +87,7 @@ export default function Reader() {
     const loadVoices = () => {
       const list = window.speechSynthesis.getVoices();
       voices.current = list;
-      const turkish = list.find((voice) =>
-        voice.lang?.toLowerCase().startsWith("tr"),
-      );
+      const turkish = pickTurkishVoice(list);
       if (turkish) setVoiceLabel(turkish.name);
     };
 
@@ -73,13 +129,17 @@ export default function Reader() {
       const utterance = new SpeechSynthesisUtterance(word);
       utterance.lang = "tr-TR";
       utterance.rate = speed;
-      utterance.pitch = 1;
+      utterance.pitch = CHILD_PITCH;
       utterance.volume = 1;
 
-      const voice = voices.current.find((item) =>
-        item.lang?.toLowerCase().startsWith("tr"),
-      );
-      if (voice) utterance.voice = voice;
+      const voice = pickTurkishVoice(voices.current);
+      if (voice) {
+        try {
+          utterance.voice = voice;
+        } catch {
+          // Bazı tarayıcılar ses nesnesini reddedebilir; varsayılan sesle devam et.
+        }
+      }
 
       utterance.onend = advance;
       utterance.onerror = advance;
@@ -247,7 +307,9 @@ export default function Reader() {
 
         <div className="mt-14 flex flex-col items-center gap-3 text-[10px] text-ivory/30">
           <p>
-            {voiceLabel ? `Ses: ${voiceLabel}` : "Türkçe ses hazırlanıyor…"}
+            {voiceLabel
+              ? "Türkçe · çocuk sesi"
+              : "Türkçe ses hazırlanıyor…"}
           </p>
           <Link
             href="/"
