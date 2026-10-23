@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Crescent } from "@/components/crescent";
+import { WordArt } from "@/components/word-art";
+import { KologlanMusic } from "@/lib/kologlan-music";
+import { artFor } from "@/lib/word-art";
 import { pad, wordCount, words } from "@/lib/words";
 
 type Phase = "intro" | "playing" | "paused";
@@ -72,8 +75,10 @@ export default function Reader() {
   const [index, setIndex] = useState(0);
   const [muted, setMuted] = useState(false);
   const [speed, setSpeed] = useState(1);
+  const [musicOn, setMusicOn] = useState(true);
   const [voiceLabel, setVoiceLabel] = useState<string | null>(null);
   const voices = useRef<SpeechSynthesisVoice[]>([]);
+  const music = useRef<KologlanMusic | null>(null);
   const finished = index >= words.length;
 
   /* ——— sesi hazırla ——— */
@@ -100,6 +105,52 @@ export default function Reader() {
       synth.cancel();
     };
   }, []);
+
+  /* ——— Keloğlan havası ——— */
+  const ensureMusic = useCallback(() => {
+    if (!music.current) music.current = new KologlanMusic();
+    return music.current;
+  }, []);
+
+  const toggleMusic = useCallback(() => {
+    const next = !musicOn;
+    setMusicOn(next);
+    if (next) {
+      void ensureMusic().start();
+    } else {
+      ensureMusic().stop();
+    }
+  }, [ensureMusic, musicOn]);
+
+  useEffect(() => {
+    if (!finished) return;
+    music.current?.stop();
+  }, [finished]);
+
+  useEffect(() => {
+    const onVisibility = () => {
+      if (document.hidden) music.current?.suspend();
+      else music.current?.resume();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      music.current?.dispose();
+      music.current = null;
+    };
+  }, []);
+
+  /* ——— sıradaki kelimenin resmini önden yükle ——— */
+  useEffect(() => {
+    if (phase !== "playing") return;
+    for (let ahead = 1; ahead <= 2; ahead += 1) {
+      const upcoming = words[index + ahead];
+      const url = upcoming ? artFor(upcoming) : undefined;
+      if (!url) continue;
+      const image = new window.Image();
+      image.src = url;
+    }
+  }, [index, phase]);
 
   /* ——— sıradaki kelimeyi oku ——— */
   useEffect(() => {
@@ -192,9 +243,10 @@ export default function Reader() {
       warmUp.volume = 0;
       window.speechSynthesis.speak(warmUp);
     }
+    if (musicOn) void ensureMusic().start();
     setIndex(0);
     setPhase("playing");
-  }, []);
+  }, [ensureMusic, musicOn]);
 
   const toggle = useCallback(() => {
     setPhase((current) => {
@@ -216,14 +268,20 @@ export default function Reader() {
   }, []);
 
   const restart = useCallback(() => {
+    if (musicOn) void ensureMusic().start();
     setIndex(0);
     setPhase("playing");
-  }, []);
+  }, [ensureMusic, musicOn]);
 
   /* ——— klavye ——— */
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
       if (event.key === "Escape") return;
+      if (event.key.toLowerCase() === "m") {
+        event.preventDefault();
+        toggleMusic();
+        return;
+      }
       if (phase === "intro") {
         if (event.key === " " || event.key === "Enter") {
           event.preventDefault();
@@ -259,7 +317,7 @@ export default function Reader() {
 
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [phase, index, finished, start, toggle, goTo, restart]);
+  }, [phase, index, finished, start, toggle, goTo, restart, toggleMusic]);
 
   if (phase === "intro") {
     return (
@@ -303,6 +361,32 @@ export default function Reader() {
             <span className="h-2.5 w-px bg-ivory/15" />
             <span>Türkçe ses</span>
           </div>
+
+          <button
+            type="button"
+            onClick={toggleMusic}
+            aria-pressed={musicOn}
+            aria-label={
+              musicOn
+                ? "Keloğlan havasını kapat"
+                : "Keloğlan havasını aç"
+            }
+            className={`mt-7 inline-flex items-center gap-2.5 rounded-full border px-4 py-2 transition-colors ${
+              musicOn
+                ? "border-gold/35 text-gold-soft hover:bg-gold/10"
+                : "border-ivory/12 text-ivory/35 hover:border-ivory/25 hover:text-ivory/60"
+            }`}
+          >
+            <NoteIcon muted={!musicOn} />
+            <span className="smallcaps text-[9px] tracking-[0.2em]">
+              Keloğlan havası
+            </span>
+            <span
+              className={`h-1 w-1 rounded-full ${
+                musicOn ? "bg-gold" : "bg-ivory/25"
+              }`}
+            />
+          </button>
         </div>
 
         <div className="mt-14 flex flex-col items-center gap-3 text-[10px] text-ivory/30">
