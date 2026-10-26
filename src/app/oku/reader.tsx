@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Crescent } from "@/components/crescent";
-import { WordArt } from "@/components/word-art";
+import { WordImage } from "@/components/word-image";
 import { KologlanMusic } from "@/lib/kologlan-music";
 import { artFor } from "@/lib/word-art";
+import { imageFor } from "@/lib/word-images";
 import { pad, wordCount, words } from "@/lib/words";
 
 type Phase = "intro" | "playing" | "paused";
@@ -140,15 +141,17 @@ export default function Reader() {
     };
   }, []);
 
-  /* ——— sıradaki kelimenin resmini önden yükle ——— */
+  /* ——— sıradaki kelimelerin resimlerini önden yükle ——— */
   useEffect(() => {
     if (phase !== "playing") return;
-    for (let ahead = 1; ahead <= 2; ahead += 1) {
+    for (let ahead = 0; ahead <= 2; ahead += 1) {
       const upcoming = words[index + ahead];
-      const url = upcoming ? artFor(upcoming) : undefined;
-      if (!url) continue;
-      const image = new window.Image();
-      image.src = url;
+      if (!upcoming) continue;
+      for (const url of [imageFor(upcoming), artFor(upcoming)]) {
+        if (!url) continue;
+        const image = new window.Image();
+        image.src = url;
+      }
     }
   }, [index, phase]);
 
@@ -488,7 +491,7 @@ export default function Reader() {
 
   const current = words[Math.min(index, words.length - 1)];
   const progress = Math.min(100, ((index + 1) / wordCount) * 100);
-  const wordSize = Math.min(20, 150 / current.length);
+  const wordSize = Math.min(16, 130 / current.length);
 
   return (
     <main className="night-stage grain grain-light relative flex h-dvh flex-col overflow-hidden text-ivory">
@@ -530,16 +533,23 @@ export default function Reader() {
       </div>
 
       <div className="relative z-10 flex flex-1 items-center justify-center px-6">
-        <div key={index} className="animate-word-in max-w-[92vw] text-center">
+        <div
+          key={index}
+          className="animate-word-in flex max-w-[92vw] flex-col items-center text-center"
+        >
+          <WordImage
+            word={current}
+            className="reader-art w-[min(34vh,68vw,19rem)]"
+          />
           <h1
             aria-live={muted ? "polite" : "off"}
             aria-atomic="true"
-            style={{ fontSize: `clamp(3rem, ${wordSize}vw, 11rem)` }}
-            className="whitespace-nowrap font-display font-light leading-[0.95] tracking-[-0.025em]"
+            style={{ fontSize: `clamp(2.6rem, ${wordSize}vw, 10rem)` }}
+            className="reader-word mt-[clamp(1rem,2.6vh,1.75rem)] whitespace-nowrap font-display font-light leading-[0.95] tracking-[-0.025em]"
           >
             {current}
           </h1>
-          <div className="mt-8 flex items-center justify-center gap-3">
+          <div className="mt-[clamp(0.85rem,2vh,1.5rem)] flex items-center justify-center gap-3">
             <span className="h-px w-12 bg-gold/25" />
             <span className="h-1 w-1 rotate-45 bg-gold/60" />
             <span className="h-px w-12 bg-gold/25" />
@@ -643,7 +653,7 @@ export default function Reader() {
           </Link>
         </div>
 
-        <p className="mt-6 hidden text-center text-[9px] tracking-[0.18em] text-ivory/25 sm:block">
+        <p className="reader-hint mt-6 hidden text-center text-[9px] tracking-[0.18em] text-ivory/25 sm:block">
           BOŞLUK DURAKLAT · ← → GEZİN · R BAŞTAN
         </p>
       </footer>
@@ -696,6 +706,27 @@ function SpeakerIcon({ muted }: { muted: boolean }) {
           <path d="M14.8 5.6a6.2 6.2 0 0 1 0 8.8" />
         </>
       )}
+    </svg>
+  );
+}
+
+function NoteIcon({ muted }: { muted: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-3.5 w-3.5"
+      aria-hidden="true"
+    >
+      <path d="M7.8 5.1v7.1" />
+      <path d="M7.8 5.1l6.1-1.3v7.1" />
+      <ellipse cx="6" cy="12.6" rx="1.8" ry="1.4" />
+      <ellipse cx="12.1" cy="11.3" rx="1.8" ry="1.4" />
+      {muted ? <path d="M4 16 16 4" /> : null}
     </svg>
   );
 }

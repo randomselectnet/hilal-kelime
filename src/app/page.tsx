@@ -7,7 +7,7 @@ const steps = [
   {
     number: "01",
     title: "Yazdır",
-    body: "Barkodu PNG olarak indir ya da doğrudan yazdır. Kartı kesip istediğin yere yapıştır.",
+    body: "Hazır boyutlardan birini seç ya da kendi ölçünü gir (1–16 cm), PNG olarak indir ya da doğrudan yazdır. Kartı kesip istediğin yere yapıştır.",
   },
   {
     number: "02",

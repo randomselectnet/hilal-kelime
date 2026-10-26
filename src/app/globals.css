@@ -193,6 +193,21 @@ body {
   }
 }
 
+/* Kısa yatay ekranlarda resim ve kelime küçülerek sığar. */
+@media (orientation: landscape) and (max-height: 600px) {
+  .reader-art {
+    width: min(30vh, 24vw, 10rem);
+  }
+
+  .reader-word {
+    font-size: clamp(2rem, 8vh, 4rem) !important;
+  }
+
+  .reader-hint {
+    display: none !important;
+  }
+}
+
 /* ————— yazdırma ————— */
 
 .print-only {

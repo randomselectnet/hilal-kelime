@@ -13,6 +13,35 @@ type QrState = {
 
 const INITIAL: QrState = { png: null, svg: "", error: null };
 
+/** Hazır boyutlar (cm). Elle değer girildiğinde bunların seçili durumu kalkar. */
+const QR_PRESETS = [
+  { id: "small", label: "Küçük", cm: 3 },
+  { id: "medium", label: "Orta", cm: 5 },
+  { id: "large", label: "Büyük", cm: 8 },
+] as const;
+
+const MIN_CM = 1;
+const MAX_CM = 16;
+const RECOMMENDED_MIN_CM = 2;
+const PRINT_DPI = 600;
+
+/** "4,5" veya "4.5" → 4.5; geçersizse null. */
+function parseCm(value: string): number | null {
+  const normalized = value.trim().replace(",", ".");
+  if (!/^\d+(?:\.\d*)?$/.test(normalized)) return null;
+  const parsed = Number(normalized);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function formatCm(value: number): string {
+  return String(Math.round(value * 100) / 100).replace(".", ",");
+}
+
+function pxForCm(cm: number): number {
+  const pixels = Math.round((cm / 2.54) * PRINT_DPI);
+  return Math.min(4096, Math.max(200, pixels));
+}
+
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "";
 
@@ -32,9 +61,46 @@ export default function QrPanel() {
   const [draft, setDraft] = useState<string | null>(null);
   const [qr, setQr] = useState<QrState>(INITIAL);
   const [copied, setCopied] = useState(false);
+  const [cmText, setCmText] = useState("5");
+  const [cm, setCm] = useState(5);
+
+  const qrMm = Math.round(cm * 100) / 10;
+  const qrPx = pxForCm(cm);
+  const cmTiny = cm < RECOMMENDED_MIN_CM;
+  const compactPrint = qrMm < 30;
+  const printCardMm = compactPrint
+    ? Math.max(qrMm + 16, 44)
+    : qrMm + 20;
+  const printTitlePx = compactPrint
+    ? 16
+    : qrMm >= 80
+      ? 24
+      : qrMm >= 50
+        ? 20
+        : 17;
+  const parsedCm = parseCm(cmText);
+  const cmOutOfRange =
+    parsedCm !== null && (parsedCm < MIN_CM || parsedCm > MAX_CM);
 
   const url = draft ?? defaultUrl;
   const qrView = url.trim() ? qr : INITIAL;
+
+  function selectPreset(presetCm: number) {
+    setCm(presetCm);
+    setCmText(formatCm(presetCm));
+  }
+
+  function changeCm(value: string) {
+    setCmText(value);
+    const parsed = parseCm(value);
+    if (parsed !== null && parsed >= MIN_CM && parsed <= MAX_CM) {
+      setCm(Math.round(parsed * 100) / 100);
+    }
+  }
+
+  function commitCm() {
+    setCmText(formatCm(cm));
+  }
 
   useEffect(() => {
     const value = url.trim();
@@ -49,7 +115,7 @@ export default function QrPanel() {
           color: { dark: "#17130d", light: "#ffffff" },
         };
         const [png, svg] = await Promise.all([
-          QRCode.toDataURL(value, { ...options, width: 2048 }),
+          QRCode.toDataURL(value, { ...options, width: qrPx }),
           QRCode.toString(value, { ...options, type: "svg" }),
         ]);
         if (alive) setQr({ png, svg, error: null });
@@ -68,7 +134,7 @@ export default function QrPanel() {
       alive = false;
       window.clearTimeout(timer);
     };
-  }, [url]);
+  }, [url, qrPx]);
 
   const parsed = useMemo(() => {
     try {
@@ -107,7 +173,7 @@ export default function QrPanel() {
     if (!qrView.png) return;
     const link = document.createElement("a");
     link.href = qrView.png;
-    link.download = "hilal-barkod.png";
+    link.download = `hilal-barkod-${formatCm(cm).replace(",", ".")}cm.png`;
     link.click();
   }
 
@@ -178,7 +244,95 @@ export default function QrPanel() {
             </p>
           </div>
 
-          <div className="mt-5 grid grid-cols-2 gap-2">
+          <div className="mt-5 border border-ink/12 bg-white/45 p-4">
+            <div className="flex items-baseline justify-between gap-3">
+              <span className="smallcaps text-[9px] text-ink-soft">
+                Barkod boyu
+              </span>
+              <span className="font-mono text-[9px] tracking-[0.1em] text-ink/35">
+                {formatCm(cm)} cm · {qrPx} px
+              </span>
+            </div>
+
+            <div className="mt-2.5 grid grid-cols-3 gap-2">
+              {QR_PRESETS.map((preset) => {
+                const active = Math.abs(preset.cm - cm) < 0.001;
+                return (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    onClick={() => selectPreset(preset.cm)}
+                    aria-pressed={active}
+                    className={`flex h-12 flex-col items-center justify-center border transition-colors ${
+                      active
+                        ? "border-ink bg-ink text-ivory"
+                        : "border-ink/15 bg-white/40 text-ink-soft hover:border-ink/40 hover:text-ink"
+                    }`}
+                  >
+                    <span className="text-[11px] font-medium tracking-[0.02em]">
+                      {preset.label}
+                    </span>
+                    <span
+                      className={`font-mono text-[9px] ${
+                        active ? "text-ivory/55" : "text-ink/35"
+                      }`}
+                    >
+                      {formatCm(preset.cm)} cm
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="mt-3 flex items-center justify-between gap-3 border-t border-ink/10 pt-3">
+              <label
+                htmlFor="qr-cm"
+                className="text-[11px] text-ink-soft"
+              >
+                Kendi ölçün
+              </label>
+              <div className="flex items-baseline gap-1.5">
+                <input
+                  id="qr-cm"
+                  value={cmText}
+                  onChange={(event) => changeCm(event.target.value)}
+                  onBlur={commitCm}
+                  inputMode="decimal"
+                  autoComplete="off"
+                  spellCheck={false}
+                  aria-describedby={
+                    cmOutOfRange
+                      ? "qr-cm-hint"
+                      : cmTiny
+                        ? "qr-cm-tiny"
+                        : undefined
+                  }
+                  className={`h-8 w-16 border bg-white/70 px-2 text-right font-mono text-[13px] text-ink outline-none transition-colors ${
+                    cmOutOfRange
+                      ? "border-oxblood"
+                      : "border-ink/20 focus:border-oxblood"
+                  }`}
+                  placeholder="5"
+                />
+                <span className="text-[11px] text-ink-soft">cm</span>
+              </div>
+            </div>
+
+            {cmOutOfRange ? (
+              <p id="qr-cm-hint" className="mt-2 text-[10px] text-oxblood">
+                {MIN_CM}–{MAX_CM} cm arasında bir değer gir.
+              </p>
+            ) : cmTiny ? (
+              <p
+                id="qr-cm-tiny"
+                className="mt-2 text-[10px] leading-4 text-oxblood/80"
+              >
+                2 cm altı çok küçük; baskıda okutmak zorlaşabilir.
+              </p>
+            ) : null}
+          </div>
+
+          <div className="mt-3 grid grid-cols-2 gap-2">
             <button
               type="button"
               onClick={downloadPng}
@@ -271,25 +425,46 @@ export default function QrPanel() {
       </div>
 
       <div className="print-only items-center justify-center">
-        <div className="print-card border border-black/15 bg-white p-8 text-center">
-          <div className="flex items-center justify-between border-b border-black/10 pb-4">
-            <span className="font-display text-lg">Hilal</span>
-            <span className="font-mono text-[9px] uppercase tracking-[0.2em]">
-              {wordCount} kelime
-            </span>
-          </div>
+        <div
+          className={`print-card border border-black/15 bg-white text-center ${
+            compactPrint ? "p-[4mm]" : "p-[5mm]"
+          }`}
+          style={{ width: `${printCardMm}mm` }}
+        >
+          {compactPrint ? (
+            <p className="font-display text-base">Hilal</p>
+          ) : (
+            <div className="flex items-center justify-between border-b border-black/10 pb-[3mm]">
+              <span className="font-display text-lg">Hilal</span>
+              <span className="font-mono text-[9px] uppercase tracking-[0.2em]">
+                {wordCount} kelime
+              </span>
+            </div>
+          )}
           {qrView.png ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={qrView.png}
               alt="Hilal kelime okuma barkodu"
-              className="mx-auto mt-6 w-[82mm]"
+              className={`mx-auto block ${
+                compactPrint ? "mt-[3mm]" : "mt-[5mm]"
+              }`}
+              style={{ width: `${qrMm}mm` }}
             />
           ) : null}
-          <p className="mt-6 font-display text-2xl">Kelimeleri dinle</p>
-          <p className="mt-2 text-[11px] leading-5 text-black/55">
-            Telefonun kamerasını barkoda tut, bağlantı açılsın.
+          <p
+            className={`font-display ${
+              compactPrint ? "mt-[3mm]" : "mt-[4mm]"
+            }`}
+            style={{ fontSize: `${printTitlePx}px` }}
+          >
+            Kelimeleri dinle
           </p>
+          {compactPrint ? null : (
+            <p className="mt-2 text-[11px] leading-5 text-black/55">
+              Telefonun kamerasını barkoda tut, bağlantı açılsın.
+            </p>
+          )}
         </div>
       </div>
     </div>
