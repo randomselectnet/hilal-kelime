@@ -113,20 +113,71 @@ export default function Reader() {
     return music.current;
   }, []);
 
+  const autoplayTried = useRef(false);
+
+  /* Sayfa açılır açılmaz dene; tarayıcı engellerse ilk dokunuşta başlar. */
+  useEffect(() => {
+    if (autoplayTried.current || !musicOn) return;
+    autoplayTried.current = true;
+    void ensureMusic().start();
+  }, [ensureMusic, musicOn]);
+
   const toggleMusic = useCallback(() => {
+    const player = ensureMusic();
+
+    // Müzik "açık" görünüp otomatik oynatma engellendiyse ilk dokunuş başlatır.
+    if (musicOn && !player.playing) {
+      player.unduck();
+      void player.start();
+      return;
+    }
+
     const next = !musicOn;
     setMusicOn(next);
     if (next) {
-      void ensureMusic().start();
+      void player.start();
+      if (phase === "playing" && !finished) player.duck();
+      else player.unduck();
     } else {
-      ensureMusic().stop();
+      player.stop();
     }
-  }, [ensureMusic, musicOn]);
+  }, [ensureMusic, musicOn, phase, finished]);
 
   useEffect(() => {
     if (!finished) return;
     music.current?.stop();
   }, [finished]);
+
+  /* Konuşurken müziği kıs, duraklatınca/sessizken aç. */
+  useEffect(() => {
+    const player = music.current;
+    if (!player || finished) return;
+    if (phase === "playing" && !muted) player.duck();
+    else player.unduck();
+  }, [phase, finished, muted]);
+
+  /* Tarayıcı otomatik oynatmayı engellediği için ilk dokunuşta başlat. */
+  useEffect(() => {
+    if (phase !== "intro" || !musicOn) return;
+
+    function cleanup() {
+      window.removeEventListener("pointerdown", unlock);
+      window.removeEventListener("keydown", unlock);
+    }
+
+    function unlock(event: Event) {
+      const target = event.target as Element | null;
+      if (target?.closest("[data-music-toggle]")) return;
+      cleanup();
+      const player = ensureMusic();
+      player.unduck();
+      void player.start();
+    }
+
+    window.addEventListener("pointerdown", unlock);
+    window.addEventListener("keydown", unlock);
+    return cleanup;
+  }, [ensureMusic, musicOn, phase]);
 
   useEffect(() => {
     const onVisibility = () => {
@@ -246,7 +297,11 @@ export default function Reader() {
       warmUp.volume = 0;
       window.speechSynthesis.speak(warmUp);
     }
-    if (musicOn) void ensureMusic().start();
+    if (musicOn) {
+      const player = ensureMusic();
+      void player.start();
+      player.duck();
+    }
     setIndex(0);
     setPhase("playing");
   }, [ensureMusic, musicOn]);
@@ -271,7 +326,11 @@ export default function Reader() {
   }, []);
 
   const restart = useCallback(() => {
-    if (musicOn) void ensureMusic().start();
+    if (musicOn) {
+      const player = ensureMusic();
+      void player.start();
+      player.duck();
+    }
     setIndex(0);
     setPhase("playing");
   }, [ensureMusic, musicOn]);
@@ -367,6 +426,7 @@ export default function Reader() {
 
           <button
             type="button"
+            data-music-toggle
             onClick={toggleMusic}
             aria-pressed={musicOn}
             aria-label={

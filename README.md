@@ -22,6 +22,17 @@ tonuna yaklaştırılır. Tarayıcılar sesi yalnızca bir dokunuştan sonra
 başlatabildiği için okuma ekranında **“Okumaya başla”** düğmesine bir kez dokunmak
 gerekir. Cihazda Türkçe bir ses yüklü değilse kelimeler yine sırayla gösterilir.
 
+## Arka plan müziği
+
+Okuma ekranında [`public/audio/keloglan-muzik.mp3`](public/audio/keloglan-muzik.mp3)
+döngüde çalar. Kelimeler okunurken müziğin sesi otomatik olarak kısılır, böylece
+sesli okumanın önüne geçmez. Müzik, ekrandaki **“Keloğlan havası”** düğmesiyle
+kapatılıp açılabilir.
+
+Tarayıcılar kullanıcı etkileşimi olmadan sesli otomatik oynatmayı engellediği
+için müzik sayfa açıldığı anda değil, ilk dokunuşta başlar. QR ile açılan okuma
+ekranında **“Okumaya başla”** dokunuşu bu ilk etkileşimdir.
+
 ## Yerelde çalıştırma
 
 ```bash
