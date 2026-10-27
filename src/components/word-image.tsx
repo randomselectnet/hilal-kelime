@@ -34,7 +34,7 @@ export function WordImage({
   return (
     <figure
       aria-hidden="true"
-      className={`relative aspect-square select-none ${className ?? ""}`}
+      className={`relative aspect-[3/4] select-none ${className ?? ""}`}
     >
       <div className="absolute inset-0 border border-gold/20 bg-gold/[0.03]" />
       <span className="pointer-events-none absolute -left-px -top-px h-5 w-5 border-l border-t border-gold/60" />
@@ -60,7 +60,7 @@ export function WordImage({
             decoding="async"
             onLoad={() => setLoadedSrc(src)}
             onError={() => setFailedSrc(src)}
-            className={`absolute inset-0 h-full w-full object-cover saturate-[0.97] transition-[opacity,transform] duration-1000 ease-out ${
+            className={`absolute inset-0 h-full w-full object-contain saturate-[0.97] transition-[opacity,transform] duration-1000 ease-out ${
               ready ? "scale-100 opacity-100" : "scale-[1.04] opacity-0"
             }`}
           />

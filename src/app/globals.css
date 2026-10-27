@@ -196,13 +196,14 @@ body {
 /* Kısa yatay ekranlarda resim ve kelime küçülerek sığar. */
 @media (orientation: landscape) and (max-height: 600px) {
   .reader-art {
-    width: min(30vh, 24vw, 10rem);
+    width: min(26vh, 22vw, 9rem);
   }
 
   .reader-word {
     font-size: clamp(2rem, 8vh, 4rem) !important;
   }
 
+  .reader-meta,
   .reader-hint {
     display: none !important;
   }

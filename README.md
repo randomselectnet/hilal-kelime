@@ -2,7 +2,7 @@
 
 **Yayında:** <https://randomselectnet.github.io/hilal-kelime/>
 
-Tek bir QR barkod ve kırk bir kelime. Barkodu yazdırıp bir yere yapıştırıyorsun;
+Tek bir QR barkod ve otuz bir kelime. Barkodu yazdırıp bir yere yapıştırıyorsun;
 telefonun kamerası okuttuğunda site açılıyor ve kelimeler sırayla, Türkçe sesle
 okunuyor.
 

@@ -42,3 +42,6 @@ next-env.d.ts
 
 # playwright mcp artifacts
 /.playwright-mcp/
+
+# ham (işlenmemiş) kelime fotoğrafları
+/hilal resim/

@@ -491,7 +491,7 @@ export default function Reader() {
 
   const current = words[Math.min(index, words.length - 1)];
   const progress = Math.min(100, ((index + 1) / wordCount) * 100);
-  const wordSize = Math.min(16, 130 / current.length);
+  const wordSize = Math.min(14, 110 / current.length);
 
   return (
     <main className="night-stage grain grain-light relative flex h-dvh flex-col overflow-hidden text-ivory">
@@ -539,12 +539,12 @@ export default function Reader() {
         >
           <WordImage
             word={current}
-            className="reader-art w-[min(34vh,68vw,19rem)]"
+            className="reader-art w-[min(32vh,62vw,18rem)]"
           />
           <h1
             aria-live={muted ? "polite" : "off"}
             aria-atomic="true"
-            style={{ fontSize: `clamp(2.6rem, ${wordSize}vw, 10rem)` }}
+            style={{ fontSize: `clamp(2.4rem, ${wordSize}vw, 8.5rem)` }}
             className="reader-word mt-[clamp(1rem,2.6vh,1.75rem)] whitespace-nowrap font-display font-light leading-[0.95] tracking-[-0.025em]"
           >
             {current}
@@ -622,7 +622,7 @@ export default function Reader() {
           </ControlButton>
         </div>
 
-        <div className="mx-auto mt-7 flex max-w-sm items-center justify-center gap-4 text-[10px] text-ivory/45">
+        <div className="reader-meta mx-auto mt-7 flex max-w-sm items-center justify-center gap-4 text-[10px] text-ivory/45">
           <button
             type="button"
             onClick={() =>

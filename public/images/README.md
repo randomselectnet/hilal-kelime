@@ -24,8 +24,8 @@ tercih edilir.
 
 ## Öneriler
 
-- Kare (1:1) resimler en iyi sonucu verir; farklı oranlar ortadan kırpılır.
-- En az 800 × 800 piksel, tercihen `.webp` kullan.
+- Dikey (3:4) resimler kullan; site resmi kırpmadan olduğu gibi gösterir.
+- Yaklaşık 1200 × 1600 piksel, tercihen `.webp` veya kaliteli `.jpg` kullan.
 - Resim ekledikten sonra `npm run dev` veya `npm run build` eşlemeyi kendisi
   yeniler. Sunucu açıkken eklediysen `npm run images` çalıştır.
 
@@ -35,13 +35,11 @@ tutucu olarak görünür; yani resimleri parça parça ekleyebilirsin.
 ## Beklenen dosya adları
 
 ```
-akce        azik        bey         buyruk      cenk
-cusse       cadir       cerci       degirmen    destur
-efsun       ferman      gaip        heybe       heybet
-ilica       ibrik       kadi        kagni       kavuk
-kervan      maya        mesale      mujde       nasihat
-nukte       obur        ozan        oreke       padisah
-pusat       riza        sadak       sancak      sifali
-tilsim      ulak        vezir       yagiz       yaren
-zanaat
+akce        azik        basma       bey         buyruk
+cusse       cadir       cerag       cerci       degirmen
+destur      diyar       efsun       gaip        ibrik
+kavuk       kilim       mesale      mujde       nasihat
+oreke       padisah     pusat       sadak       sancak
+sultan      sifali      yalak       zanaat      zindan
+kaynakca
 ```

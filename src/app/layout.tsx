@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     template: "%s · Hilal",
   },
   description:
-    "Tek barkod, kırk kelime. Barkodu yazdır, telefon kamerasıyla okut; kelimeler sırayla ve sesli olarak okunsun.",
+    "Tek barkod, otuz bir kelime. Barkodu yazdır, telefon kamerasıyla okut; kelimeler sırayla ve sesli olarak okunsun.",
   applicationName: "Hilal",
   openGraph: {
     title: "Hilal — Kelime Okuma",
